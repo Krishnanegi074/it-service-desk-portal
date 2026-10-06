@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { IncidentPayloadSchema } from '@/lib/schema';
 import { evaluateITILPriority, Urgency, Impact } from '@/lib/priority';
 import { insertIncident, listIncidents } from '@/lib/db';
+import { sanitizeIncidentPayload } from '@/lib/sanitizer';
 
 export async function GET() {
   try {
@@ -16,19 +17,22 @@ export async function POST(req: Request) {
   try {
     const rawBody = await req.json();
 
-    // 1. Enforce ITIL Priority calculation deterministically via code
-    const urgency = Number(rawBody.urgency) as Urgency;
-    const impact = Number(rawBody.impact) as Impact;
+    // 1. Sanitize incoming text fields to strip credentials, keys, and tokens
+    const sanitizedBody = sanitizeIncidentPayload(rawBody);
+
+    // 2. Enforce ITIL Priority calculation deterministically
+    const urgency = Number(sanitizedBody.urgency) as Urgency;
+    const impact = Number(sanitizedBody.impact) as Impact;
     const { priority } = evaluateITILPriority(urgency, impact);
 
-    // 2. Validate payload against our strict Zod schema
+    // 3. Validate against strict Zod schema
     const parsed = IncidentPayloadSchema.parse({
-      ...rawBody,
+      ...sanitizedBody,
       priority,
-      readinessScore: 90.0 // Computed completion score
+      readinessScore: Number(sanitizedBody.readinessScore) || 90.0
     });
 
-    // 3. Persist to database
+    // 4. Persist sanitized payload to storage
     const saved = await insertIncident(parsed);
 
     return NextResponse.json({ success: true, data: saved }, { status: 201 });
