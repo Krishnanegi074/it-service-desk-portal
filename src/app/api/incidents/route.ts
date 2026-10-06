@@ -3,6 +3,7 @@ import { IncidentPayloadSchema } from '@/lib/schema';
 import { evaluateITILPriority, Urgency, Impact } from '@/lib/priority';
 import { insertIncident, listIncidents } from '@/lib/db';
 import { sanitizeIncidentPayload } from '@/lib/sanitizer';
+import { dispatchHighSeverityIncident } from '@/lib/dispatcher';
 
 export async function GET() {
   try {
@@ -17,7 +18,7 @@ export async function POST(req: Request) {
   try {
     const rawBody = await req.json();
 
-    // 1. Sanitize incoming text fields to strip credentials, keys, and tokens
+    // 1. Sanitize incoming text fields to remove PII and secrets
     const sanitizedBody = sanitizeIncidentPayload(rawBody);
 
     // 2. Enforce ITIL Priority calculation deterministically
@@ -35,7 +36,13 @@ export async function POST(req: Request) {
     // 4. Persist sanitized payload to storage
     const saved = await insertIncident(parsed);
 
-    return NextResponse.json({ success: true, data: saved }, { status: 201 });
+    // 5. Trigger outbound escalation if P1 or P2
+    const dispatchStatus = await dispatchHighSeverityIncident(saved);
+
+    return NextResponse.json(
+      { success: true, data: saved, escalation: dispatchStatus },
+      { status: 201 }
+    );
   } catch (error) {
     return NextResponse.json({ success: false, error: (error as Error).message }, { status: 400 });
   }
