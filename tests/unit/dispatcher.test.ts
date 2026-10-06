@@ -12,7 +12,18 @@ describe('Outbound Escalation Dispatcher', () => {
       impact: 4,
       priority: 'P4',
       status: 'open',
-      readinessScore: 80
+      readinessScore: 80,
+      reporter: {
+        fullName: 'Test User',
+        email: 'test@corp.internal'
+      },
+      technicalContext: {
+        operatingSystem: 'macOS',
+        networkType: 'WiFi',
+        errorCode: 'SPOOL_0',
+        affectedApp: 'Printer Spooler',
+        attemptedWorkarounds: []
+      }
     };
 
     const result = await dispatchHighSeverityIncident(p3Incident);
@@ -29,7 +40,18 @@ describe('Outbound Escalation Dispatcher', () => {
       impact: 1,
       priority: 'P1',
       status: 'open',
-      readinessScore: 100
+      readinessScore: 100,
+      reporter: {
+        fullName: 'Admin User',
+        email: 'admin@corp.internal'
+      },
+      technicalContext: {
+        operatingSystem: 'Linux',
+        networkType: 'Direct',
+        errorCode: 'IDP_UNAVAILABLE',
+        affectedApp: 'Okta SSO',
+        attemptedWorkarounds: []
+      }
     };
 
     const result = await dispatchHighSeverityIncident(p1Incident);

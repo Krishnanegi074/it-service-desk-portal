@@ -107,11 +107,11 @@ export default function IncidentDetailDrawer({
 
         <div className="border-t border-slate-800 pt-4 flex gap-2">
           <button
-            disabled={updating || incident.status === 'in-progress'}
-            onClick={() => handleStatusChange('in-progress')}
+            disabled={updating || incident.status === 'in_triage'}
+            onClick={() => handleStatusChange('in_triage')}
             className="flex-1 py-2 text-xs font-semibold bg-amber-600 hover:bg-amber-500 text-white rounded transition disabled:opacity-40"
           >
-            Mark In-Progress
+            Mark In Triage
           </button>
           <button
             disabled={updating || incident.status === 'resolved'}
