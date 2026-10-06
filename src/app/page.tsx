@@ -3,12 +3,14 @@
 import { useState, useEffect } from 'react';
 import { IncidentPayload } from '@/lib/schema';
 import PreTriageModal from '@/components/PreTriageModal';
+import IncidentDetailDrawer from '@/components/IncidentDetailDrawer';
 
 export default function OperationsDashboard() {
   const [incidents, setIncidents] = useState<IncidentPayload[]>([]);
   const [filter, setFilter] = useState<string>('ALL');
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedIncident, setSelectedIncident] = useState<IncidentPayload | null>(null);
 
   useEffect(() => {
     fetchIncidents();
@@ -45,7 +47,7 @@ export default function OperationsDashboard() {
 
         <button
           onClick={() => setIsModalOpen(true)}
-          className="bg-indigo-600 hover:bg-indigo-500 font-medium text-xs px-4 py-2.5 rounded-lg text-white shadow-md transition flex items-center gap-2"
+          className="bg-indigo-600 hover:bg-indigo-500 font-medium text-xs px-4 py-2.5 rounded-lg text-white shadow-md transition flex items-center gap-2 cursor-pointer"
         >
           <span>+</span> Start Diagnostic Session
         </button>
@@ -61,7 +63,7 @@ export default function OperationsDashboard() {
               <button
                 key={p}
                 onClick={() => setFilter(p)}
-                className={`px-3 py-1 rounded border ${
+                className={`px-3 py-1 rounded border cursor-pointer ${
                   filter === p 
                     ? 'bg-slate-800 border-slate-600 text-white' 
                     : 'border-slate-800 text-slate-400 hover:text-white'
@@ -80,7 +82,7 @@ export default function OperationsDashboard() {
             <p>No incidents match the selected filter.</p>
             <button
               onClick={() => setIsModalOpen(true)}
-              className="text-xs text-indigo-400 hover:text-indigo-300 underline underline-offset-4"
+              className="text-xs text-indigo-400 hover:text-indigo-300 underline underline-offset-4 cursor-pointer"
             >
               Launch pre-triage intake session
             </button>
@@ -88,7 +90,11 @@ export default function OperationsDashboard() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {filteredIncidents.map(item => (
-              <div key={item.id} className="bg-slate-900 border border-slate-800 rounded-lg p-5 flex flex-col justify-between">
+              <div
+                key={item.id}
+                onClick={() => setSelectedIncident(item)}
+                className="bg-slate-900 border border-slate-800 hover:border-indigo-500/60 transition cursor-pointer rounded-lg p-5 flex flex-col justify-between"
+              >
                 <div>
                   <div className="flex items-center gap-2 mb-2">
                     <span className={`text-xs px-2 py-0.5 rounded font-bold ${
@@ -99,15 +105,15 @@ export default function OperationsDashboard() {
                     }`}>
                       {item.priority}
                     </span>
-                    <span className="text-xs text-slate-500 font-mono">
-                      ITIL: Urg={item.urgency} × Imp={item.impact}
+                    <span className="text-xs uppercase font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">
+                      {item.status || 'open'}
                     </span>
                     <span className="text-xs bg-slate-800 text-slate-300 px-2 py-0.5 rounded">
                       {item.category}
                     </span>
                   </div>
                   <h3 className="font-semibold text-slate-100">{item.title}</h3>
-                  <p className="text-sm text-slate-400 mt-1">{item.summary}</p>
+                  <p className="text-sm text-slate-400 mt-1 line-clamp-2">{item.summary}</p>
                 </div>
 
                 <div className="mt-4 pt-3 border-t border-slate-800/60 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-400">
@@ -126,6 +132,15 @@ export default function OperationsDashboard() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onIncidentCreated={fetchIncidents}
+      />
+
+      <IncidentDetailDrawer
+        incident={selectedIncident}
+        onClose={() => setSelectedIncident(null)}
+        onStatusUpdated={() => {
+          setSelectedIncident(null);
+          fetchIncidents();
+        }}
       />
     </main>
   );
