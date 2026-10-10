@@ -1,4 +1,25 @@
-.vercel
+# Dependencies
+node_modules/
+
+# Next.js build output
+.next/
+.next-e2e/
+out/
+
+# Test and tooling output
+coverage/
+playwright-report/
+test-results/
+*.tsbuildinfo
+
+# Logs
+*.log
+npm-debug.log*
+
+# Local deployment and operating-system files
+.vercel/
 .DS_Store
-*.env
-*.env.local
+
+# Environment files (keep the documented template)
+.env*
+!.env.example

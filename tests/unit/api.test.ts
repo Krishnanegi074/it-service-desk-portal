@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { IncidentPayloadSchema } from '../../src/lib/schema';
+import { IncidentPayloadSchema, IncidentStatusSchema } from '../../src/lib/schema';
 import { evaluateITILPriority } from '../../src/lib/priority';
 
 describe('Incident Ingestion Contract', () => {
@@ -50,5 +50,12 @@ describe('Incident Ingestion Contract', () => {
 
     const validated = IncidentPayloadSchema.safeParse(invalidPayload);
     expect(validated.success).toBe(false);
+  });
+
+  it('uses one canonical incident status contract', () => {
+    expect(IncidentStatusSchema.safeParse('in_triage').success).toBe(true);
+    expect(IncidentStatusSchema.safeParse('dispatched').success).toBe(true);
+    expect(IncidentStatusSchema.safeParse('in-progress').success).toBe(false);
+    expect(IncidentStatusSchema.safeParse('escalated').success).toBe(false);
   });
 });

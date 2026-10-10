@@ -1,147 +1,56 @@
-'use client';
+import Link from 'next/link';
 
-import { useState, useEffect } from 'react';
-import { IncidentPayload } from '@/lib/schema';
-import PreTriageModal from '@/components/PreTriageModal';
-import IncidentDetailDrawer from '@/components/IncidentDetailDrawer';
-
-export default function OperationsDashboard() {
-  const [incidents, setIncidents] = useState<IncidentPayload[]>([]);
-  const [filter, setFilter] = useState<string>('ALL');
-  const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedIncident, setSelectedIncident] = useState<IncidentPayload | null>(null);
-
-  useEffect(() => {
-    fetchIncidents();
-  }, []);
-
-  async function fetchIncidents() {
-    try {
-      const res = await fetch('/api/incidents');
-      const json = await res.json();
-      if (json.success) setIncidents(json.data);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  const filteredIncidents = filter === 'ALL' 
-    ? incidents 
-    : incidents.filter(i => i.priority === filter);
-
+export default function HomePage() {
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-100 p-8 font-sans">
-      <header className="max-w-6xl mx-auto mb-8 border-b border-slate-800 pb-6 flex justify-between items-center">
-        <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold tracking-tight">IT Pre-Triage Engineering Console</h1>
-            <span className="text-xs bg-emerald-950 text-emerald-400 border border-emerald-800 px-2 py-0.5 rounded font-mono">
-              v2-fullstack
-            </span>
-          </div>
-          <p className="text-slate-400 text-sm mt-1">
-            Deterministic ITIL Priority Matrix • Rule-Engine Diagnostics • Postgres Persistence
-          </p>
+    <main className="min-h-screen bg-slate-950 text-slate-100">
+      <header className="border-b border-slate-800 bg-slate-950/95">
+        <div className="max-w-6xl mx-auto px-5 py-4 flex justify-between items-center">
+          <div className="font-semibold tracking-tight">Corporate IT Services</div>
+          <span className="text-xs rounded-full border border-emerald-800 bg-emerald-950 px-3 py-1 text-emerald-400">Systems operational</span>
         </div>
-
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="bg-indigo-600 hover:bg-indigo-500 font-medium text-xs px-4 py-2.5 rounded-lg text-white shadow-md transition flex items-center gap-2 cursor-pointer"
-        >
-          <span>+</span> Start Diagnostic Session
-        </button>
       </header>
 
-      <div className="max-w-6xl mx-auto space-y-4">
-        <div className="flex justify-between items-center mb-2">
-          <h2 className="text-lg font-semibold text-slate-200">
-            Live Intake Queue ({filteredIncidents.length})
-          </h2>
-          <div className="flex gap-1 text-xs">
-            {['ALL', 'P1', 'P2', 'P3', 'P4'].map(p => (
-              <button
-                key={p}
-                onClick={() => setFilter(p)}
-                className={`px-3 py-1 rounded border cursor-pointer ${
-                  filter === p 
-                    ? 'bg-slate-800 border-slate-600 text-white' 
-                    : 'border-slate-800 text-slate-400 hover:text-white'
-                }`}
-              >
-                {p}
-              </button>
-            ))}
+      <section className="max-w-6xl mx-auto px-5 py-16 sm:py-24 grid lg:grid-cols-[1.2fr_0.8fr] gap-12 items-center">
+        <div>
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-indigo-400">IT service desk</p>
+          <h1 className="mt-4 text-4xl sm:text-5xl font-bold tracking-tight leading-tight">Get technical help without the back-and-forth.</h1>
+          <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-400">
+            Report an issue through a guided diagnostic form. We collect the details engineers need, calculate priority consistently, and create a trackable incident.
+          </p>
+          <div className="mt-8 flex flex-col sm:flex-row gap-3">
+            <Link href="/report" className="rounded-lg bg-indigo-600 hover:bg-indigo-500 px-5 py-3 text-center font-semibold text-white transition">Report an IT issue</Link>
+            <Link href="/console" className="rounded-lg border border-slate-700 hover:bg-slate-900 px-5 py-3 text-center font-semibold text-slate-300 transition">Open engineer console</Link>
           </div>
         </div>
 
-        {loading ? (
-          <p className="text-slate-500 text-sm">Loading incident queue...</p>
-        ) : filteredIncidents.length === 0 ? (
-          <div className="border border-dashed border-slate-800 rounded-lg p-16 text-center text-slate-500 text-sm space-y-3">
-            <p>No incidents match the selected filter.</p>
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="text-xs text-indigo-400 hover:text-indigo-300 underline underline-offset-4 cursor-pointer"
-            >
-              Launch pre-triage intake session
-            </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {filteredIncidents.map(item => (
-              <div
-                key={item.id}
-                onClick={() => setSelectedIncident(item)}
-                className="bg-slate-900 border border-slate-800 hover:border-indigo-500/60 transition cursor-pointer rounded-lg p-5 flex flex-col justify-between"
-              >
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className={`text-xs px-2 py-0.5 rounded font-bold ${
-                      item.priority === 'P1' ? 'bg-red-950 text-red-400 border border-red-800' :
-                      item.priority === 'P2' ? 'bg-amber-950 text-amber-400 border border-amber-800' :
-                      item.priority === 'P3' ? 'bg-blue-950 text-blue-400 border border-blue-800' :
-                      'bg-slate-800 text-slate-300'
-                    }`}>
-                      {item.priority}
-                    </span>
-                    <span className="text-xs uppercase font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">
-                      {item.status || 'open'}
-                    </span>
-                    <span className="text-xs bg-slate-800 text-slate-300 px-2 py-0.5 rounded">
-                      {item.category}
-                    </span>
-                  </div>
-                  <h3 className="font-semibold text-slate-100">{item.title}</h3>
-                  <p className="text-sm text-slate-400 mt-1 line-clamp-2">{item.summary}</p>
-                </div>
-
-                <div className="mt-4 pt-3 border-t border-slate-800/60 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-400">
-                  <div><span className="text-slate-500">OS:</span> {item.technicalContext?.operatingSystem}</div>
-                  <div><span className="text-slate-500">Net:</span> {item.technicalContext?.networkType}</div>
-                  <div><span className="text-slate-500">Error:</span> {item.technicalContext?.errorCode || 'None'}</div>
-                  <div className="ml-auto font-mono text-emerald-400">Readiness: {item.readinessScore}%</div>
-                </div>
-              </div>
+        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl">
+          <h2 className="font-semibold text-slate-100">What happens after you submit?</h2>
+          <ol className="mt-5 space-y-5">
+            {[
+              ['1', 'Focused diagnostics', 'Questions adapt to VPN, email, access, application, or hardware issues.'],
+              ['2', 'Consistent priority', 'Business impact is translated into a deterministic ITIL priority.'],
+              ['3', 'Trackable ticket', 'You receive an incident ID and a status page for follow-up.']
+            ].map(([number, title, description]) => (
+              <li key={number} className="flex gap-4">
+                <span className="h-8 w-8 shrink-0 rounded-full bg-indigo-950 border border-indigo-800 text-indigo-300 flex items-center justify-center text-sm font-bold">{number}</span>
+                <div><h3 className="font-medium text-slate-200">{title}</h3><p className="mt-1 text-sm text-slate-400">{description}</p></div>
+              </li>
             ))}
-          </div>
-        )}
-      </div>
+          </ol>
+        </div>
+      </section>
 
-      <PreTriageModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onIncidentCreated={fetchIncidents}
-      />
-
-      <IncidentDetailDrawer
-        incident={selectedIncident}
-        onClose={() => setSelectedIncident(null)}
-        onStatusUpdated={() => {
-          setSelectedIncident(null);
-          fetchIncidents();
-        }}
-      />
+      <section className="border-t border-slate-900 bg-slate-950/60">
+        <div className="max-w-6xl mx-auto px-5 py-10 grid sm:grid-cols-3 gap-4">
+          {[
+            ['Guided intake', 'Complete tickets with fewer clarification messages.'],
+            ['Security-aware', 'Credential patterns are redacted before storage.'],
+            ['Human owned', 'Engineers remain responsible for diagnosis and resolution.']
+          ].map(([title, description]) => (
+            <div key={title} className="rounded-xl border border-slate-800 bg-slate-900/70 p-5"><h2 className="font-semibold">{title}</h2><p className="mt-2 text-sm text-slate-400">{description}</p></div>
+          ))}
+        </div>
+      </section>
     </main>
   );
 }

@@ -1,37 +1,77 @@
-# Engineering Roadmap: IT Pre-Triage Engine
+# Engineering Roadmap
 
-## 1. Completed
-- [x] Responsive portal landing page with incident reporting instructions.
-- [x] Integration of Voiceflow Webchat Runtime SDK via client bundle.
-- [x] Conversational diagnostic flow collecting OS, network type, and error string.
-- [x] In-chat standardized incident card synthesis (`IT Triage Summary`).
-- [x] Continuous deployment pipeline on Vercel.
-- [x] Audit and credibility hardening (clarified prototype status and external dependencies).
+## Product objective
 
----
+Create a resolver-ready ticket quality layer for small internal IT teams: employees submit structured diagnostics, the portal calculates priority consistently, Jira receives one complete ticket, and engineers manage the handoff from a protected console.
 
-## 2. In Progress
-- [ ] Initializing `v2-fullstack` branch with Next.js 15 (App Router), TypeScript, and Tailwind CSS.
-- [ ] Designing normalized relational database schema for incidents and users in PostgreSQL.
+## Phase 0 — Repository stabilization
 
----
+- [x] Ignore dependencies, build output, coverage, logs, and local secrets
+- [x] Add lint, type-check, test, and build verification
+- [x] Unify the incident status contract
+- [x] Persist incident status changes through the storage layer
+- [x] Replace hardcoded reporter data with form input
+- [x] Preserve a valid zero readiness score
+- [x] Display submission errors to the user
+- [x] Add an environment template and current README
+- [x] Add GitHub Actions verification
+- [ ] Deploy the v2 application to a staging URL
 
-## 3. Planned Deliverables
+## Phase 1 — Database foundation
 
-### P0: Core Reliability & Engineering Depth (Target: v2 MVP)
-- **Deterministic Priority Engine:** Implement strict ITIL Impact × Urgency matrix in pure TypeScript with unit tests (replacing LLM-guessed priorities).
-- **Rule-Based Diagnostic Playbooks:** Transition conversational slot filling into version-controlled application code.
-- **Relational Storage:** Deploy PostgreSQL (via Neon or Supabase) with tables for `incidents`, `users`, `diagnostic_answers`, and `audit_logs`.
-- **Secret & PII Sanitizer:** Server-side regex filtering to scrub credentials and tokens before persistence.
-- **Basic Engineer Workspace:** Authenticated view allowing technicians to review triage cards, inspect collected metadata, and filter by status.
+- [x] Add version-controlled PostgreSQL migrations
+- [x] Add `users`, `incidents`, `diagnostic_answers`, `incident_events`, and `integration_deliveries`
+- [x] Add timestamps, ownership, assignment, indexes, and pagination
+- [x] Add audit events for incident transitions
+- [x] Add idempotency protection for incident creation
+- [ ] Add PostgreSQL integration tests
 
-### P1: Enterprise Integration & User Experience
-- **Jira Service Management Adapter:** Resilient API client syncing structured triage payloads into upstream Jira projects.
-- **Employee Incident Portal:** Magic-link authentication for employees to view submitted tickets and live resolution states.
-- **Dynamic Status Verification:** Direct polling to an external status API to display actual corporate service health.
-- **Accessible Non-Chat Alternative:** WCAG-compliant structured static form matching conversational playbooks.
+## Phase 2 — Employee intake
 
-### P2: Advanced Infrastructure & Telemetry
-- **Incident Deduplication:** Time-window clustering to detect localized outages and group child incidents.
-- **Asynchronous Queueing:** BullMQ / Redis worker implementation for retryable, rate-limited ITSM delivery.
-- **Attachment Sandboxing:** Secure pre-signed upload pipeline with MIME-type verification for error screenshots.
+- [x] Separate `/report`, success, ticket-status, and `/console` routes
+- [x] Add VPN, email, SSO, application, and hardware playbooks
+- [x] Derive impact and urgency from employee-friendly questions
+- [x] Display a ticket ID and submission summary
+- [x] Add accessible loading, error, empty, and success states
+
+## Phase 3 — Authentication and security
+
+- [x] Add Supabase email magic-link authentication
+- [x] Add employee, engineer, and admin roles
+- [x] Protect console pages and API routes server-side
+- [x] Add row-level security and baseline rate limiting
+- [x] Expand secret redaction and add retention controls
+- [x] Add verified cookie sessions and actor attribution for status changes
+
+## Phase 4 — Engineer console
+
+- [x] Add search, pagination, assignment, and status filters
+- [x] Add internal notes and incident event history
+- [x] Show priority attribution and diagnostic completeness
+- [x] Add manual retry for failed deliveries
+
+## Phase 5 — Jira Service Management
+
+- [x] Define a generic ticketing adapter contract
+- [x] Implement Jira issue creation and field mapping
+- [x] Add idempotent delivery, retries, and failure visibility
+- [x] Store Jira issue references
+- [x] Synchronize Jira status through a webhook
+
+## Phase 6 — Production readiness
+
+- [x] Add end-to-end employee and engineer tests
+- [x] Add structured logging and error monitoring
+- [x] Separate development, staging, and production environments
+- [ ] Verify backup, restore, migration, and rollback procedures
+- [x] Add automated accessibility and responsive checks for critical journeys
+- [ ] Complete manual keyboard and assistive-technology review
+
+## Phase 7 — Pilot
+
+- [x] Add privacy-conscious intake completion and abandonment measurement
+- [x] Add engineer feedback for routing accuracy and clarification contacts
+- [x] Add an administrator dashboard for completeness, assignment time, routing, delivery, and workflow outcomes
+- [ ] Pilot with one internal IT team
+- [ ] Collect a representative pilot sample and review the outcome measures with the team
+- [ ] Use pilot evidence to choose the next integration or automation feature
