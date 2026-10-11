@@ -66,7 +66,7 @@ Next.js route handlers
 
 Requirements:
 
-- Node.js 20 or newer
+- Node.js 24 or newer
 - npm
 - PostgreSQL is optional for local development
 
