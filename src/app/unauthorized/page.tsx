@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 export default function UnauthorizedPage() {
   return (
-    <main className="min-h-screen bg-slate-950 px-4 py-16 text-slate-100">
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-slate-950 px-4 py-16 text-slate-100">
       <section className="mx-auto max-w-lg rounded-2xl border border-slate-800 bg-slate-900 p-8 text-center">
         <p className="text-sm font-semibold uppercase tracking-wider text-amber-400">Access restricted</p>
         <h1 className="mt-3 text-2xl font-bold">Engineer access is required.</h1>

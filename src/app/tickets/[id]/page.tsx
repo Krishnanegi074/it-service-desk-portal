@@ -13,7 +13,7 @@ export default async function TicketStatusPage({ params }: { params: Promise<{ i
   if (!incident || !canViewIncident(principal, incident)) notFound();
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-100 px-4 py-12">
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-slate-950 text-slate-100 px-4 py-12">
       <div className="max-w-3xl mx-auto">
         <nav className="mb-5 flex items-center justify-between"><Link href="/" className="text-sm text-slate-400 hover:text-white">← Service desk home</Link><form action="/auth/signout" method="post"><button type="submit" className="text-sm text-slate-400 hover:text-white">Sign out</button></form></nav>
         <section className="rounded-2xl border border-slate-800 bg-slate-900 p-6 sm:p-8">

@@ -158,7 +158,7 @@ export default function IncidentIntakeForm({ onSuccess, onCancel, initialReporte
     <div className="space-y-6">
       <div className="flex justify-between items-start border-b border-slate-800 pb-4">
         <div>
-          <h1 className="text-xl font-bold text-slate-100">Report an IT issue</h1>
+          <h1 id="incident-intake-title" className="text-xl font-bold text-slate-100">Report an IT issue</h1>
           <p className="text-sm text-slate-400 mt-1">
             Answer focused questions so the IT team receives a resolver-ready ticket.
           </p>
@@ -175,7 +175,14 @@ export default function IncidentIntakeForm({ onSuccess, onCancel, initialReporte
           <span className="text-slate-400">Diagnostic completeness</span>
           <span className={readinessScore === 100 ? 'text-emerald-400 font-bold' : 'text-amber-400 font-bold'}>{readinessScore}%</span>
         </div>
-        <div className="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
+        <div
+          role="progressbar"
+          aria-label="Diagnostic completeness"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={readinessScore}
+          className="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800"
+        >
           <div className={`h-full transition-all duration-300 ${readinessScore === 100 ? 'bg-emerald-500' : 'bg-amber-500'}`} style={{ width: `${readinessScore}%` }} />
         </div>
       </div>
@@ -256,7 +263,7 @@ export default function IncidentIntakeForm({ onSuccess, onCancel, initialReporte
               )}
             </div>
           ))}
-          {nextPrompt && <p className="text-xs text-amber-300 bg-amber-950/30 border border-amber-900/50 p-2 rounded">Next required detail: {nextPrompt}</p>}
+          {nextPrompt && <p aria-live="polite" className="text-xs text-amber-300 bg-amber-950/30 border border-amber-900/50 p-2 rounded">Next required detail: {nextPrompt}</p>}
         </fieldset>
 
         <div>

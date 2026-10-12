@@ -17,7 +17,7 @@ export default async function LoginPage({
   if (principal) redirect(nextPath);
 
   return (
-    <main className="min-h-screen bg-slate-950 px-4 py-14 text-slate-100">
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-slate-950 px-4 py-14 text-slate-100">
       <div className="mx-auto max-w-md">
         <Link href="/" className="text-sm text-slate-400 hover:text-white">← Service desk home</Link>
         <section className="mt-5 rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl sm:p-8">

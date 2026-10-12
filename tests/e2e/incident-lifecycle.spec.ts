@@ -9,11 +9,31 @@ async function expectNoSeriousAccessibilityViolations(page: Page) {
   expect(seriousViolations, JSON.stringify(seriousViolations, null, 2)).toEqual([]);
 }
 
+test('product homepage explains the workflow and remains responsive', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByRole('heading', { name: 'Better tickets start before the queue' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Try the guided intake' })).toHaveAttribute('href', '/report');
+  await expect(page.getByRole('heading', { name: 'Four moves. One useful handoff.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Sensitive by nature. Deliberate by design.' })).toBeVisible();
+  await expectNoSeriousAccessibilityViolations(page);
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(page.getByRole('heading', { name: 'Better tickets start before the queue' })).toBeVisible();
+  const hasHorizontalOverflow = await page.evaluate(
+    () => document.documentElement.scrollWidth > document.documentElement.clientWidth
+  );
+  expect(hasHorizontalOverflow).toBe(false);
+});
+
 test('employee intake reaches the engineer workflow', async ({ page }) => {
   const title = `E2E VPN outage ${Date.now()}`;
   const internalNote = 'E2E verification: gateway logs reviewed.';
 
   await page.goto('/report');
+  await page.keyboard.press('Tab');
+  await expect(page.getByRole('link', { name: 'Skip to main content' })).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#main-content')).toBeFocused();
   await expect(page.getByRole('heading', { name: 'Report an IT issue' })).toBeVisible();
   await expectNoSeriousAccessibilityViolations(page);
   await page.getByLabel('Short title').fill(title);
@@ -46,6 +66,7 @@ test('employee intake reaches the engineer workflow', async ({ page }) => {
   await expect(drawer.getByRole('heading', { name: 'Jira delivery' })).toBeVisible();
   await expectNoSeriousAccessibilityViolations(page);
   await expect(drawer.getByText(/jira · pending/)).toBeVisible();
+  await expect(drawer.getByRole('button', { name: 'Close incident details' })).toBeFocused();
   await drawer.getByLabel('Assignee').selectOption({ label: 'Demo Administrator · admin' });
   await expect(drawer.getByText('Assigned to Demo Administrator')).toBeVisible();
   await drawer.getByLabel('Status').selectOption('in_triage');
@@ -59,11 +80,33 @@ test('employee intake reaches the engineer workflow', async ({ page }) => {
   await drawer.getByRole('button', { name: 'Save pilot feedback' }).click();
   await expect(drawer.getByText('Pilot feedback saved.')).toBeVisible();
 
+  await page.keyboard.press('Escape');
+  await expect(drawer).toBeHidden();
+  await expect(page.getByRole('button', { name: new RegExp(title) })).toBeFocused();
+
   await page.goto('/admin/pilot');
   await expect(page.getByRole('heading', { name: 'Service-desk outcome dashboard' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Routing accuracy' })).toBeVisible();
   await expect(page.getByText(/incidents with engineer feedback: 100%/i)).toBeVisible();
   await expectNoSeriousAccessibilityViolations(page);
+});
+
+test('quick intake dialog traps focus, closes with Escape, and restores focus', async ({ page }) => {
+  await page.goto('/console');
+  const trigger = page.getByRole('button', { name: 'Quick intake' });
+  await trigger.focus();
+  await trigger.click();
+
+  const dialog = page.getByRole('dialog', { name: 'Report an IT issue' });
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByRole('button', { name: 'Close diagnostic intake' })).toBeFocused();
+  await page.keyboard.press('Shift+Tab');
+  await expect(dialog.getByRole('button', { name: 'Cancel' })).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(dialog.getByRole('button', { name: 'Close diagnostic intake' })).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(dialog).toBeHidden();
+  await expect(trigger).toBeFocused();
 });
 
 test('console remains usable at a mobile viewport', async ({ page }) => {

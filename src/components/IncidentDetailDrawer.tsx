@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { evaluateITILPriority } from '@/lib/priority';
 import type {
   AppUserSummary,
@@ -41,6 +41,55 @@ export default function IncidentDetailDrawer({
   const [working, setWorking] = useState(false);
   const [activityLoading, setActivityLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const onCloseRef = useRef(onClose);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
+  useEffect(() => {
+    if (!incident?.id) return;
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const dialog = dialogRef.current;
+    const focusableSelector = 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+    const focusableElements = () => Array.from(dialog?.querySelectorAll<HTMLElement>(focusableSelector) ?? []);
+    focusableElements()[0]?.focus();
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        onCloseRef.current();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const elements = focusableElements();
+      if (elements.length === 0) {
+        event.preventDefault();
+        dialog?.focus();
+        return;
+      }
+      const first = elements[0];
+      const last = elements[elements.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      window.requestAnimationFrame(() => {
+        const fallbackTrigger = document.querySelector<HTMLElement>(`[data-incident-id="${incident.id}"]`);
+        if (previousFocus?.isConnected) previousFocus.focus();
+        else fallbackTrigger?.focus();
+      });
+    };
+  }, [incident?.id]);
 
   useEffect(() => {
     if (!incident?.id) return;
@@ -144,7 +193,7 @@ export default function IncidentDetailDrawer({
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end overflow-hidden bg-black/60 backdrop-blur-xs" role="dialog" aria-modal="true" aria-labelledby="incident-drawer-title">
-      <div className="h-full w-full max-w-2xl overflow-y-auto border-l border-slate-800 bg-slate-900 p-5 shadow-2xl sm:p-7">
+      <div ref={dialogRef} tabIndex={-1} className="h-full w-full max-w-2xl overflow-y-auto border-l border-slate-800 bg-slate-900 p-5 shadow-2xl sm:p-7">
         <div className="flex items-start justify-between border-b border-slate-800 pb-5">
           <div className="min-w-0">
             <div className="mb-2 flex flex-wrap items-center gap-2"><span className={`rounded px-2.5 py-0.5 text-xs font-bold ${incident.priority === 'P1' ? 'border border-red-800 bg-red-950 text-red-400' : incident.priority === 'P2' ? 'border border-amber-800 bg-amber-950 text-amber-400' : incident.priority === 'P3' ? 'border border-blue-800 bg-blue-950 text-blue-400' : 'bg-slate-800 text-slate-300'}`}>{incident.priority}</span><span className="rounded bg-slate-800 px-2 py-0.5 font-mono text-xs uppercase text-slate-300">{incident.status.replace('_', ' ')}</span></div>
@@ -171,7 +220,7 @@ export default function IncidentDetailDrawer({
 
           <section>
             <div className="mb-2 flex justify-between text-xs"><h3 className="font-semibold uppercase text-slate-400">Diagnostic completeness</h3><span className="font-mono text-emerald-400">{incident.readinessScore}%</span></div>
-            <div className="h-2 overflow-hidden rounded-full bg-slate-950"><div className="h-full bg-emerald-500" style={{ width: `${incident.readinessScore}%` }} /></div>
+            <div role="progressbar" aria-label="Diagnostic completeness" aria-valuemin={0} aria-valuemax={100} aria-valuenow={incident.readinessScore} className="h-2 overflow-hidden rounded-full bg-slate-950"><div className="h-full bg-emerald-500" style={{ width: `${incident.readinessScore}%` }} /></div>
           </section>
 
           <section><h3 className="mb-2 text-xs font-semibold uppercase text-slate-400">Technical context</h3><dl className="space-y-2 rounded-lg border border-slate-800 bg-slate-950 p-3 text-xs"><div className="flex justify-between gap-4 border-b border-slate-800/60 pb-2"><dt className="text-slate-400">Operating system</dt><dd className="font-mono text-slate-200">{incident.technicalContext.operatingSystem}</dd></div><div className="flex justify-between gap-4 border-b border-slate-800/60 pb-2"><dt className="text-slate-400">Network</dt><dd className="text-right font-mono text-slate-200">{incident.technicalContext.networkType}</dd></div><div className="flex justify-between gap-4 border-b border-slate-800/60 pb-2"><dt className="text-slate-400">Application/device</dt><dd className="text-right font-mono text-slate-200">{incident.technicalContext.affectedApp}</dd></div><div><dt className="mb-1 text-slate-400">Error code or message</dt><dd className="break-all rounded border border-slate-800 bg-slate-900 p-2 font-mono text-amber-300">{incident.technicalContext.errorCode || 'None reported'}</dd></div>{incident.technicalContext.attemptedWorkarounds.length > 0 && <div><dt className="mt-2 text-slate-400">Attempted workarounds</dt><dd className="mt-1 text-slate-300">{incident.technicalContext.attemptedWorkarounds.join(' • ')}</dd></div>}</dl></section>
@@ -182,7 +231,7 @@ export default function IncidentDetailDrawer({
 
           <section>
             <h3 className="mb-2 text-xs font-semibold uppercase text-slate-400">Internal note</h3>
-            <form onSubmit={submitNote} className="space-y-2"><textarea value={note} onChange={event => setNote(event.target.value)} required minLength={2} maxLength={2000} rows={3} placeholder="Add troubleshooting context for engineers…" className="field" /><div className="flex justify-end"><button type="submit" disabled={working || note.trim().length < 2} className="rounded bg-indigo-600 px-4 py-2 text-xs font-semibold hover:bg-indigo-500 disabled:opacity-40">Add internal note</button></div></form>
+            <form onSubmit={submitNote} className="space-y-2"><label htmlFor="internal-note" className="sr-only">Internal note</label><textarea id="internal-note" value={note} onChange={event => setNote(event.target.value)} required minLength={2} maxLength={2000} rows={3} placeholder="Add troubleshooting context for engineers…" className="field" /><div className="flex justify-end"><button type="submit" disabled={working || note.trim().length < 2} className="rounded bg-indigo-600 px-4 py-2 text-xs font-semibold hover:bg-indigo-500 disabled:opacity-40">Add internal note</button></div></form>
           </section>
 
           <section><h3 className="mb-3 text-xs font-semibold uppercase text-slate-400">Activity history</h3>{activityLoading ? <p role="status" className="text-xs text-slate-400">Loading activity…</p> : events.length === 0 ? <p className="text-xs text-slate-400">No activity recorded.</p> : <ol className="space-y-3 border-l border-slate-700 pl-4">{events.map(event => <li key={event.id} className="relative text-sm"><span className="absolute -left-[1.28rem] top-1 h-2 w-2 rounded-full bg-indigo-400" /><p className="text-slate-300">{eventDescription(event)}</p>{event.eventType === 'note_added' && <p className="mt-1 rounded border border-slate-800 bg-slate-950 p-2 text-xs leading-5 text-slate-400">{String(event.metadata.note ?? '')}</p>}<time className="mt-1 block text-xs text-slate-400">{new Date(event.createdAt).toLocaleString('en-GB')}</time></li>)}</ol>}</section>

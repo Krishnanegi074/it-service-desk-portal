@@ -13,7 +13,7 @@ export default async function IncidentSuccessPage({ params }: { params: Promise<
   if (!incident || !canViewIncident(principal, incident)) notFound();
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-100 px-4 py-16">
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-slate-950 text-slate-100 px-4 py-16">
       <div className="max-w-2xl mx-auto rounded-2xl border border-emerald-900 bg-slate-900 p-6 sm:p-9 shadow-2xl">
         <div className="h-12 w-12 rounded-full bg-emerald-950 border border-emerald-800 text-emerald-400 flex items-center justify-center text-xl">✓</div>
         <p className="mt-5 text-sm font-semibold uppercase tracking-wider text-emerald-400">Incident created</p>

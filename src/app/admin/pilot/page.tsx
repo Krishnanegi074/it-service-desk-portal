@@ -27,7 +27,7 @@ export default async function PilotMetricsPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-slate-950 px-4 py-10 text-slate-100">
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-slate-950 px-4 py-10 text-slate-100">
       <div className="mx-auto max-w-6xl">
         <nav className="flex flex-wrap items-center justify-between gap-3 text-sm">
           <Link href="/console" className="text-slate-400 hover:text-white">← Engineer console</Link>

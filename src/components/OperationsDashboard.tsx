@@ -99,7 +99,7 @@ export default function OperationsDashboard({
   const activeFilters = Boolean(query || priority || status || assigneeId);
 
   return (
-    <main className="min-h-screen bg-slate-950 p-4 font-sans text-slate-100 sm:p-8">
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-slate-950 p-4 font-sans text-slate-100 sm:p-8">
       <header className="mx-auto mb-8 flex max-w-7xl flex-col gap-4 border-b border-slate-800 pb-6 xl:flex-row xl:items-center xl:justify-between">
         <div>
           <div className="flex flex-wrap items-center gap-3">
@@ -149,7 +149,7 @@ export default function OperationsDashboard({
         ) : (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             {incidents.map(item => (
-              <button type="button" key={item.id} onClick={() => setSelectedIncident(item)} className="flex min-h-56 flex-col justify-between rounded-lg border border-slate-800 bg-slate-900 p-5 text-left transition hover:border-indigo-500/60 focus:border-indigo-500 focus:outline-none">
+              <button type="button" key={item.id} data-incident-id={item.id} onClick={() => setSelectedIncident(item)} className="flex min-h-56 flex-col justify-between rounded-lg border border-slate-800 bg-slate-900 p-5 text-left transition hover:border-indigo-500/60 focus-visible:border-indigo-400">
                 <div>
                   <div className="mb-2 flex flex-wrap items-center gap-2"><span className={`rounded px-2 py-0.5 text-xs font-bold ${item.priority === 'P1' ? 'border border-red-800 bg-red-950 text-red-400' : item.priority === 'P2' ? 'border border-amber-800 bg-amber-950 text-amber-400' : item.priority === 'P3' ? 'border border-blue-800 bg-blue-950 text-blue-400' : 'bg-slate-800 text-slate-300'}`}>{item.priority}</span><span className="rounded bg-slate-800 px-1.5 py-0.5 font-mono text-xs uppercase text-slate-400">{item.status.replace('_', ' ')}</span><span className="rounded bg-slate-800 px-2 py-0.5 text-xs text-slate-300">{item.category}</span></div>
                   <h3 className="font-semibold text-slate-100">{item.title}</h3><p className="mt-1 line-clamp-2 text-sm text-slate-400">{item.summary}</p>

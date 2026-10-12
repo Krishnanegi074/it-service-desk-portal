@@ -12,7 +12,7 @@ export default function ReportPageClient({
   const router = useRouter();
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-100 px-4 py-8 sm:py-12">
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-slate-950 text-slate-100 px-4 py-8 sm:py-12">
       <div className="max-w-3xl mx-auto">
         <nav className="mb-5 flex justify-between items-center text-sm">
           <Link href="/" className="text-slate-400 hover:text-white">← Service desk home</Link>

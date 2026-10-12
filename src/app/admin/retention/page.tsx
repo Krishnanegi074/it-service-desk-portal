@@ -15,7 +15,7 @@ export default async function RetentionAdminPage() {
   const preview = await previewIncidentRetention(calculateRetentionCutoff(retentionDays));
 
   return (
-    <main className="min-h-screen bg-slate-950 px-4 py-10 text-slate-100">
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-slate-950 px-4 py-10 text-slate-100">
       <div className="mx-auto max-w-4xl">
         <nav className="flex items-center justify-between text-sm"><Link href="/console" className="text-slate-400 hover:text-white">← Engineer console</Link><span className="text-slate-400">{principal.fullName} · administrator</span></nav>
         <section className="mt-6 rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl sm:p-8">
