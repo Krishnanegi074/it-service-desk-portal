@@ -47,6 +47,27 @@ describe('Jira status sync', () => {
     expect(JSON.parse(fetchMock.mock.calls[2][1].body)).toEqual({ transition: { id: '31' } });
   });
 
+  it('never resolves by cancelling, and steps through in-progress when needed', async () => {
+    configureJira();
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(json({ fields: { status: { name: 'Open' } } }))
+      .mockResolvedValueOnce(json({ transitions: [
+        { id: '5', name: 'Cancel', to: { name: 'Canceled' } },
+        { id: '6', name: 'Start', to: { name: 'In progress' } }
+      ] }))
+      .mockResolvedValueOnce(new Response(null, { status: 204 }))
+      .mockResolvedValueOnce(json({ transitions: [
+        { id: '5', name: 'Cancel', to: { name: 'Canceled' } },
+        { id: '7', name: 'Resolve', to: { name: 'Resolved' } }
+      ] }))
+      .mockResolvedValueOnce(new Response(null, { status: 204 }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    expect(await syncJiraIssueStatus('IT-2', 'resolved')).toEqual({ status: 'synced', issueKey: 'IT-2', jiraStatus: 'Resolved' });
+    expect(JSON.parse(fetchMock.mock.calls[2][1].body)).toEqual({ transition: { id: '6' } });
+    expect(JSON.parse(fetchMock.mock.calls[4][1].body)).toEqual({ transition: { id: '7' } });
+  });
+
   it('does nothing when Jira already shows the same status', async () => {
     configureJira();
     const fetchMock = vi.fn().mockResolvedValueOnce(json({ fields: { status: { name: 'Resolved' } } }));

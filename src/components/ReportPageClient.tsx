@@ -13,7 +13,8 @@ export default function ReportPageClient({
 }) {
   const router = useRouter();
   const [fullName, setFullName] = useState(currentUser.fullName);
-  const needsName = isPlaceholderName(fullName, currentUser.email);
+  const [editingName, setEditingName] = useState(false);
+  const needsName = editingName || isPlaceholderName(fullName, currentUser.email);
 
   return (
     <main id="main-content" tabIndex={-1} className="min-h-screen bg-slate-950 text-slate-100 px-4 py-8 sm:py-12">
@@ -21,11 +22,12 @@ export default function ReportPageClient({
         <nav className="mb-5 flex justify-between items-center text-sm">
           <Link href="/" className="text-slate-400 hover:text-white">← Service desk home</Link>
           <div className="flex items-center gap-3">
+            {!needsName ? <button type="button" onClick={() => setEditingName(true)} className="text-slate-400 hover:text-slate-200">Change name</button> : null}
             <Link href="/console" className="text-slate-400 hover:text-slate-200">Engineer console</Link>
             <form action="/auth/signout" method="post"><button type="submit" className="text-slate-400 hover:text-slate-200">Sign out</button></form>
           </div>
         </nav>
-        {needsName ? <NamePrompt onSaved={setFullName} /> : null}
+        {needsName ? <NamePrompt onSaved={name => { setFullName(name); setEditingName(false); }} /> : null}
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-8 shadow-2xl">
           <IncidentIntakeForm
             key={fullName}
