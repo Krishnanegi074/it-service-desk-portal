@@ -510,6 +510,16 @@ export async function updateIncidentStatus(
   }
 }
 
+/** Updates only the display name of the given user. Role and email are never touched here. */
+export async function updateUserDisplayName(userId: string, fullName: string): Promise<boolean> {
+  if (!pool) return false;
+  const result = await pool.query(
+    `UPDATE app_users SET full_name = $1, updated_at = NOW() WHERE id = $2`,
+    [fullName, userId]
+  );
+  return (result.rowCount ?? 0) > 0;
+}
+
 export async function listAssignableStaff(): Promise<AppUserSummary[]> {
   if (!pool) return [];
   const result = await pool.query(

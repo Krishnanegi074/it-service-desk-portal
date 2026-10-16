@@ -1,4 +1,10 @@
 {
   "framework": "nextjs",
-  "buildCommand": "npm run build -- --webpack"
+  "buildCommand": "npm run build -- --webpack",
+  "crons": [
+    {
+      "path": "/api/health",
+      "schedule": "17 3 * * *"
+    }
+  ]
 }

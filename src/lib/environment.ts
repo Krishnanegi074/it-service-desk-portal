@@ -66,7 +66,7 @@ export function inspectEnvironment(source: EnvironmentSource = process.env) {
 
   return {
     environment,
-    version: source.APP_VERSION || source.VERCEL_GIT_COMMIT_SHA || 'development',
+    version: source.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) || source.APP_VERSION || 'development',
     ready: errors.length === 0,
     errors,
     warnings,
