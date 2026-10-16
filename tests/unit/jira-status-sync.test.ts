@@ -55,6 +55,14 @@ describe('Jira status sync', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
+  it('leaves Jira alone when it has no matching middle step', async () => {
+    configureJira();
+    vi.stubGlobal('fetch', vi.fn()
+      .mockResolvedValueOnce(json({ fields: { status: { name: 'Canceled' } } }))
+      .mockResolvedValueOnce(json({ transitions: [] })));
+    expect(await syncJiraIssueStatus('IT-1', 'in_triage')).toEqual({ status: 'unchanged', issueKey: 'IT-1', jiraStatus: 'Canceled' });
+  });
+
   it('reports failures without throwing', async () => {
     configureJira();
     vi.stubGlobal('fetch', vi.fn()

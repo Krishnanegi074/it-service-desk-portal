@@ -67,10 +67,11 @@ export async function syncJiraIssueStatus(
   const issueUrl = `${config.baseUrl}/rest/api/3/issue/${encodeURIComponent(issueKey)}`;
 
   try {
+    let currentName: string | undefined;
     const current = await fetch(`${issueUrl}?fields=status`, { headers });
     if (current.ok) {
       const body = (await current.json().catch(() => ({}))) as { fields?: { status?: { name?: string } } };
-      const currentName = body.fields?.status?.name;
+      currentName = body.fields?.status?.name;
       if (currentName && mapJiraStatus(currentName) === target) {
         return { status: 'unchanged', issueKey, jiraStatus: currentName };
       }
@@ -82,6 +83,10 @@ export async function syncJiraIssueStatus(
     }
     const { transitions = [] } = (await listed.json().catch(() => ({}))) as { transitions?: JiraTransition[] };
     const transition = pickTransition(transitions, target);
+    if (!transition && (target === 'in_triage' || target === 'dispatched') && currentName) {
+      // Middle steps are portal-only triage stages; not every Jira workflow has an equivalent.
+      return { status: 'unchanged', issueKey, jiraStatus: currentName };
+    }
     if (!transition) {
       return {
         status: 'failed',
