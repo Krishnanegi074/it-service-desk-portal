@@ -41,6 +41,7 @@ export default function IncidentDetailDrawer({
   const [working, setWorking] = useState(false);
   const [activityLoading, setActivityLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const onCloseRef = useRef(onClose);
 
@@ -125,10 +126,16 @@ export default function IncidentDetailDrawer({
   async function updateIncident(path: string, init: RequestInit) {
     setWorking(true);
     setError(null);
+    setNotice(null);
     try {
       const response = await fetch(path, init);
       const body = await response.json();
       if (!response.ok || !body.success) throw new Error(body.error || 'Unable to update incident.');
+      const sync = body.jiraSync as { status: string; issueKey?: string; jiraStatus?: string; error?: string } | null | undefined;
+      if (sync?.status === 'synced') setNotice(`Saved. ${sync.issueKey} moved to "${sync.jiraStatus}" in Jira.`);
+      else if (sync?.status === 'unchanged') setNotice(`Saved. ${sync.issueKey} was already "${sync.jiraStatus}" in Jira.`);
+      else if (sync?.status === 'failed') setError(`Saved here, but Jira was not updated: ${sync.error}`);
+      else setNotice('Saved.');
       await onChanged(body.data);
       await loadActivity(activeIncident.id!);
     } catch (updateError) {
@@ -203,6 +210,7 @@ export default function IncidentDetailDrawer({
           <button onClick={onClose} aria-label="Close incident details" className="ml-4 text-xl font-mono text-slate-400 hover:text-slate-200">✕</button>
         </div>
 
+        {notice && <div role="status" className="mt-4 rounded border border-emerald-900 bg-emerald-950/30 p-3 text-sm text-emerald-300">{notice}</div>}
         {error && <div role="alert" className="mt-4 rounded border border-red-900 bg-red-950/30 p-3 text-sm text-red-300">{error}</div>}
 
         <div className="mt-6 space-y-6">

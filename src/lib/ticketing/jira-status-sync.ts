@@ -1,0 +1,105 @@
+import { mapJiraStatus } from '@/lib/jira-webhook';
+import type { IncidentStatus } from '@/lib/schema';
+import { getJiraConfig } from './jira';
+
+export type JiraStatusSyncResult =
+  | { status: 'synced'; issueKey: string; jiraStatus: string }
+  | { status: 'unchanged'; issueKey: string; jiraStatus: string }
+  | { status: 'skipped'; reason: string }
+  | { status: 'failed'; issueKey?: string; error: string };
+
+interface JiraTransition {
+  id: string;
+  name: string;
+  to?: { name?: string };
+}
+
+/** Preferred Jira target status names for each portal status, best match first. */
+const PREFERRED_TARGETS: Record<IncidentStatus, string[]> = {
+  open: ['open', 'to do', 'new', 'backlog'],
+  in_triage: ['in progress', 'work in progress', 'in triage', 'investigating', 'waiting for support'],
+  dispatched: ['escalated', 'assigned', 'dispatched', 'in progress', 'work in progress'],
+  resolved: ['resolved', 'done', 'closed']
+};
+
+export function pickTransition(
+  transitions: JiraTransition[],
+  target: IncidentStatus
+): JiraTransition | null {
+  const candidates = transitions.filter(t => t.to?.name && mapJiraStatus(t.to.name) === target);
+  if (target === 'in_triage' || target === 'dispatched') {
+    // Fall back to any transition named for the preferred targets, even if the mapping differs.
+    for (const name of PREFERRED_TARGETS[target]) {
+      const exact = transitions.find(t => t.to?.name?.trim().toLowerCase() === name);
+      if (exact) return exact;
+    }
+  }
+  for (const name of PREFERRED_TARGETS[target]) {
+    const exact = candidates.find(t => t.to?.name?.trim().toLowerCase() === name);
+    if (exact) return exact;
+  }
+  return candidates[0] ?? null;
+}
+
+/**
+ * Moves the linked Jira issue to the status that matches the portal status.
+ * Never throws: the portal change has already been saved, so Jira problems are reported, not raised.
+ */
+export async function syncJiraIssueStatus(
+  issueKey: string | null | undefined,
+  target: IncidentStatus
+): Promise<JiraStatusSyncResult> {
+  if (!issueKey) return { status: 'skipped', reason: 'Incident has no linked Jira issue.' };
+
+  let config;
+  try {
+    config = getJiraConfig();
+  } catch (error) {
+    return { status: 'failed', issueKey, error: error instanceof Error ? error.message : 'Invalid Jira configuration.' };
+  }
+  if (!config) return { status: 'skipped', reason: 'Jira is not configured.' };
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Basic ${Buffer.from(`${config.email}:${config.apiToken}`).toString('base64')}`
+  };
+  const issueUrl = `${config.baseUrl}/rest/api/3/issue/${encodeURIComponent(issueKey)}`;
+
+  try {
+    const current = await fetch(`${issueUrl}?fields=status`, { headers });
+    if (current.ok) {
+      const body = (await current.json().catch(() => ({}))) as { fields?: { status?: { name?: string } } };
+      const currentName = body.fields?.status?.name;
+      if (currentName && mapJiraStatus(currentName) === target) {
+        return { status: 'unchanged', issueKey, jiraStatus: currentName };
+      }
+    }
+
+    const listed = await fetch(`${issueUrl}/transitions`, { headers });
+    if (!listed.ok) {
+      return { status: 'failed', issueKey, error: `Jira transitions lookup returned HTTP ${listed.status}` };
+    }
+    const { transitions = [] } = (await listed.json().catch(() => ({}))) as { transitions?: JiraTransition[] };
+    const transition = pickTransition(transitions, target);
+    if (!transition) {
+      return {
+        status: 'failed',
+        issueKey,
+        error: `No Jira transition leads to a "${target.replace('_', ' ')}" status from the issue's current status.`
+      };
+    }
+
+    const moved = await fetch(`${issueUrl}/transitions`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ transition: { id: transition.id } })
+    });
+    if (!moved.ok) {
+      return { status: 'failed', issueKey, error: `Jira transition returned HTTP ${moved.status}` };
+    }
+    return { status: 'synced', issueKey, jiraStatus: transition.to?.name ?? transition.name };
+  } catch (error) {
+    return { status: 'failed', issueKey, error: error instanceof Error ? error.message : 'Jira request failed.' };
+  }
+}
