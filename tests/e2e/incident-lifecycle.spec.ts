@@ -2,6 +2,9 @@ import { expect, test, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
 async function expectNoSeriousAccessibilityViolations(page: Page) {
+  // Scroll reveals start faint and finish fully visible; audit the finished state.
+  await page.evaluate(() => document.querySelectorAll('.rv-h, .rv-b').forEach(el => el.classList.add('rv-in')));
+  await page.waitForTimeout(1200);
   const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
   const seriousViolations = results.violations.filter(
     violation => violation.impact === 'serious' || violation.impact === 'critical'
@@ -157,4 +160,17 @@ test('console remains usable at a mobile viewport', async ({ page }) => {
     () => document.documentElement.scrollWidth > document.documentElement.clientWidth
   );
   expect(hasHorizontalOverflow).toBe(false);
+});
+
+test('how-it-works story plays as the reader scrolls', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/');
+  const story = page.locator('#how');
+  await expect(story).toHaveAttribute('data-mode', 'scroll');
+  await expect(story).not.toContainText('Delivered to Jira');
+  const end = await story.evaluate(el => el.getBoundingClientRect().bottom + window.scrollY - window.innerHeight - 4);
+  await page.evaluate(y => window.scrollTo(0, y), end);
+  await expect(story).toContainText('Delivered to Jira');
+  await expect(story).toContainText('[REDACTED_SECRET]');
+  await expect(story).not.toContainText('Summer2026!');
 });

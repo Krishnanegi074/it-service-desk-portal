@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { JetBrains_Mono, Schibsted_Grotesk } from 'next/font/google';
+import { ScrollReveal } from '@/components/site/ScrollReveal';
 import { SiteFooter, SiteNav } from '@/components/site/SiteChrome';
 import './site.css';
 
@@ -14,6 +15,7 @@ export default function SiteLayout({ children }: { children: ReactNode }) {
         {children}
       </main>
       <SiteFooter />
+      <ScrollReveal />
     </div>
   );
 }

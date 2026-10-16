@@ -15,7 +15,7 @@
   color-scheme: light; background: var(--bg); color: var(--fg);
 }
 .tp-site * { box-sizing: border-box; }
-.tp-site { background: var(--bg); color: var(--fg); font-family: var(--display); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+.tp-site { background: var(--bg); color: var(--fg); font-family: var(--display); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; overflow-x: clip; }
 .tp-site a { color: inherit; text-decoration: none; }
 .tp-site :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
 .tp-site .rail { max-width: 1200px; margin: 0 auto; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
@@ -474,3 +474,65 @@
 @media (max-width: 960px) { .tp-site .menu-toggle { display: inline-flex; align-items: center; } }
 @media (min-width: 961px) { .tp-site .mobile-menu { display: none !important; } }
 @media (max-width: 420px) { .tp-site .nav .btn-primary { padding: 0 14px; } .tp-site .mark { font-size: 15px; } }
+
+/* ---- Scroll reveals (applied only after ScrollReveal marks the page ready) ---- */
+.rv-ready .tp-site .rv-h .rv-w { display: inline-block; opacity: 0; filter: blur(10px); transform: translateY(0.18em);
+  transition: opacity .7s cubic-bezier(.2,.7,.2,1), filter .7s cubic-bezier(.2,.7,.2,1), transform .7s cubic-bezier(.2,.7,.2,1);
+  transition-delay: calc(var(--i, 0) * 55ms); }
+.rv-ready .tp-site .rv-h.rv-in .rv-w { opacity: 1; filter: blur(0); transform: none; }
+.tp-site em .rv-w { background: inherit; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.rv-ready .tp-site .rv-b { opacity: 0; filter: blur(6px); transform: translateY(18px);
+  transition: opacity .8s cubic-bezier(.2,.7,.2,1), filter .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1);
+  transition-delay: var(--d, 0ms); }
+.rv-ready .tp-site .rv-b.rv-in { opacity: 1; filter: none; transform: none; }
+
+/* ---- Scroll-driven "How it works" story ---- */
+.tp-site .story { padding-block: 0; }
+.tp-site .story .story-pin { padding-block: 112px; }
+.tp-site .story[data-mode="scroll"] .story-track { height: 340vh; }
+.tp-site .story[data-mode="scroll"] .story-pin { position: sticky; top: 68px; min-height: calc(100vh - 68px); display: flex; align-items: center; padding-block: 40px; }
+.tp-site .story-grid { width: 100%; align-items: center; }
+.tp-site .story .steps li, .tp-site .story .steps li h3, .tp-site .story .steps li p, .tp-site .story .steps li .n { transition: color .35s, border-color .35s; }
+.tp-site .story[data-mode="scroll"] .steps li h3 { color: var(--muted); }
+.tp-site .story[data-mode="scroll"] .steps li p, .tp-site .story[data-mode="scroll"] .steps li .n { color: var(--dim); }
+.tp-site .story[data-mode="scroll"] .steps li.done h3 { color: var(--fg); }
+.tp-site .story[data-mode="scroll"] .steps li.active h3 { color: var(--fg); }
+.tp-site .story[data-mode="scroll"] .steps li.active p { color: var(--muted); }
+.tp-site .story .steps li.active .n { color: var(--accent); font-weight: 600; }
+.tp-site .story-window { display: flex; flex-direction: column; }
+.tp-site .story-chat { height: min(520px, calc(100vh - 260px)); min-height: 360px; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end;
+  mask-image: linear-gradient(180deg, transparent 0, #000 56px); -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 56px); }
+.tp-site .story[data-mode="static"] .story-chat { height: auto; min-height: 0; mask-image: none; -webkit-mask-image: none; }
+.tp-site .story-feed { padding: 22px; display: grid; gap: 12px; }
+.tp-site .story-feed .ticket { margin: 0; }
+.tp-site .story-in { animation: story-in .45s cubic-bezier(.2,.7,.2,1) both; }
+@keyframes story-in { from { opacity: 0; transform: translateY(10px); filter: blur(4px); } }
+.tp-site .story-sys { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; font-size: 13.5px; color: var(--muted); padding-left: 2px; }
+.tp-site .story-sys b { color: var(--fg); font-weight: 600; }
+.tp-site .story-sys .mono { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.tp-site .story-sys .tick, .tp-site .story-sys .spin { width: 16px; height: 16px; border-radius: 50%; flex: none; }
+.tp-site .story-sys .tick { background: color-mix(in srgb, var(--ok) 14%, transparent); position: relative; }
+.tp-site .story-sys .tick::after { content: ""; position: absolute; left: 5px; top: 3.5px; width: 4px; height: 7px; border: solid var(--ok); border-width: 0 2px 2px 0; transform: rotate(45deg); }
+.tp-site .story-sys .spin { border: 2px solid var(--line); border-top-color: var(--grad-to); animation: story-spin .8s linear infinite; }
+@keyframes story-spin { to { transform: rotate(360deg); } }
+.tp-site .story-input { margin: 0 18px 18px; display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; font-size: 13.5px; color: var(--dim); background: var(--surface); }
+.tp-site .story-input .send { width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center; background: var(--raised); color: var(--muted); font-size: 13px; }
+@media (prefers-reduced-motion: reduce) {
+  .tp-site .story-in, .tp-site .story-sys .spin { animation: none; }
+}
+
+/* ---- Soft moving colour glow behind product demos (HQ-style gradient panel, light theme) ---- */
+.tp-site .aura { position: relative; isolation: isolate; min-width: 0; }
+.tp-site .aura::before { content: ""; position: absolute; inset: -56px -44px; z-index: -1; border-radius: 64px; pointer-events: none;
+  background:
+    radial-gradient(38% 46% at 18% 28%, rgba(255, 168, 92, 0.55), transparent 70%),
+    radial-gradient(42% 50% at 84% 18%, rgba(176, 150, 255, 0.42), transparent 70%),
+    radial-gradient(48% 48% at 62% 88%, rgba(255, 132, 168, 0.38), transparent 70%);
+  filter: blur(30px); animation: aura-drift 18s ease-in-out infinite alternate; }
+@keyframes aura-drift {
+  0% { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
+  50% { transform: translate3d(14px, -12px, 0) rotate(5deg) scale(1.05); }
+  100% { transform: translate3d(-12px, 10px, 0) rotate(-4deg) scale(0.98); }
+}
+@media (max-width: 640px) { .tp-site .aura::before { inset: -28px -12px; } }
+@media (prefers-reduced-motion: reduce) { .tp-site .aura::before { animation: none; } }

@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { HeroField } from '@/components/site/HeroField';
 import { LiveIntake } from '@/components/site/LiveIntake';
 import { ProductShowcase } from '@/components/site/ProductShowcase';
+import { ScrollStory } from '@/components/site/ScrollStory';
 
 export const metadata: Metadata = {
   title: 'Triage Portal — Every IT ticket, resolver-ready',
@@ -32,7 +33,7 @@ export default function HomePage() {
         </div>
         <p className="fine">Code on GitHub · Works with Jira Service Management · Runs without Jira too</p>
       </div>
-      <LiveIntake />
+      <div className="aura"><LiveIntake /></div>
     </div>
   </section>
   <div className="marquee" aria-label="Issue types covered">
@@ -78,44 +79,7 @@ export default function HomePage() {
     </div>
   </section>
 
-  <section className="block" id="how" aria-labelledby="how-title">
-    <div className="rail split">
-      <div>
-        <span className="label">How it works</span>
-        <h2 className="h2" id="how-title" style={{ marginTop: '18px' }}>Four steps. <em>Zero</em> back‑and‑forth.</h2>
-        <ol className="steps">
-          <li><span className="n">01</span><div><h3>Listen</h3><p>The employee describes the problem in their own words and picks what it’s closest to.</p></div></li>
-          <li><span className="n">02</span><div><h3>Guide</h3><p>A playbook for that issue asks only the questions an engineer would ask first.</p></div></li>
-          <li><span className="n">03</span><div><h3>Structure</h3><p>Impact and urgency map to a fixed P1–P4 matrix. Passwords and keys are removed before anything is saved.</p></div></li>
-          <li><span className="n">04</span><div><h3>Hand off</h3><p>The ticket lands in the engineer queue and, if you use it, in Jira Service Management.</p></div></li>
-        </ol>
-      </div>
-
-      <div className="annotated">
-      <div className="window" role="img" aria-label="Example intake conversation ending in a P2 ticket">
-        <div className="window-bar"><div className="dots"><i></i><i></i><i></i></div><span className="label">Report an issue · Network / VPN</span><span className="label">67%</span></div>
-        <div className="chat">
-          <div className="msg bot"><span className="label">Triage Portal</span>Which operating system are you using?</div>
-          <div className="msg user">macOS</div>
-          <div className="msg bot"><span className="label">Triage Portal</span>Are you on home Wi‑Fi, office Ethernet, or a mobile hotspot?</div>
-          <div className="msg user">Home Wi‑Fi</div>
-          <div className="msg bot"><span className="label">Triage Portal</span>What exact error message does the VPN display?</div>
-          <div className="msg user">AUTH_TIMEOUT. password: Summer2026!</div>
-          <div className="msg warn"><span className="label">Heads up</span>Never share passwords here. We removed it before saving your report.</div>
-        </div>
-        <div className="ticket">
-          <div className="ticket-head"><span className="label">TK‑20261015‑014</span><span className="pill p2">P2 · High</span></div>
-          <h4>VPN disconnects after authentication</h4>
-          <dl className="kv">
-            <div><dt>Device</dt><dd>macOS</dd></div>
-            <div><dt>Network</dt><dd>Home Wi‑Fi</dd></div>
-            <div><dt>Error</dt><dd>AUTH_TIMEOUT</dd></div>
-          </dl>
-        </div>
-      </div>
-      </div>
-    </div>
-  </section>
+  <ScrollStory />
 
   <section className="block" id="playbooks" aria-labelledby="pb-title">
     <div className="rail">
