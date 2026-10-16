@@ -11,18 +11,56 @@ async function expectNoSeriousAccessibilityViolations(page: Page) {
 
 test('product homepage explains the workflow and remains responsive', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'Better tickets start before the queue' })).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Try the guided intake' })).toHaveAttribute('href', '/report');
-  await expect(page.getByRole('heading', { name: 'Four moves. One useful handoff.' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Sensitive by nature. Deliberate by design.' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: /Every IT ticket, resolver/ })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Try the guided intake' }).first()).toHaveAttribute('href', '/report');
+  await expect(page.getByRole('heading', { name: 'Four steps. Zero back‑and‑forth.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'One good intake becomes your team’s standard.' })).toBeVisible();
+  await page.getByRole('tab', { name: /Credential redaction/ }).click();
+  await expect(page.getByRole('tabpanel')).toContainText('[REDACTED_SECRET]');
   await expectNoSeriousAccessibilityViolations(page);
 
   await page.setViewportSize({ width: 390, height: 844 });
-  await expect(page.getByRole('heading', { name: 'Better tickets start before the queue' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: /Every IT ticket, resolver/ })).toBeVisible();
   const hasHorizontalOverflow = await page.evaluate(
     () => document.documentElement.scrollWidth > document.documentElement.clientWidth
   );
   expect(hasHorizontalOverflow).toBe(false);
+});
+
+const marketingPages = [
+  { path: '/pricing', heading: 'One price for the whole IT team.' },
+  { path: '/playbooks', heading: 'Start with the questions engineers ask first.' },
+  { path: '/security', heading: 'IT tickets are sensitive. We treat them that way.' },
+  { path: '/getting-started', heading: 'Pick how you want to start.' },
+  { path: '/privacy', heading: 'Privacy notice' },
+  { path: '/terms', heading: 'Terms of use' }
+];
+
+for (const { path, heading } of marketingPages) {
+  test(`marketing page ${path} renders, is accessible and fits a phone`, async ({ page }) => {
+    await page.goto(path);
+    await expect(page.getByRole('heading', { level: 1, name: heading })).toBeVisible();
+    await expect(page.getByRole('navigation', { name: 'Primary' })).toBeVisible();
+    await expectNoSeriousAccessibilityViolations(page);
+    await page.setViewportSize({ width: 390, height: 844 });
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
+    expect(overflow).toBe(false);
+  });
+}
+
+test('pricing calculator and playbook filters respond to input', async ({ page }) => {
+  await page.goto('/pricing');
+  await page.getByRole('button', { name: /Yearly/ }).click();
+  await expect(page.locator('#plans')).toContainText('$124');
+  await page.locator('#per').fill('60');
+  await expect(page.getByText(/You’d save/)).toBeVisible();
+
+  await page.goto('/playbooks');
+  await expect(page.getByText('Showing 16 of 16 playbooks')).toBeVisible();
+  await page.getByRole('button', { name: /^Included$/ }).click();
+  await expect(page.getByText('Showing 5 of 16 playbooks')).toBeVisible();
+  await page.getByLabel('Search playbooks').fill('printer');
+  await expect(page.getByText(/No playbooks match/)).toBeVisible();
 });
 
 test('employee intake reaches the engineer workflow', async ({ page }) => {
