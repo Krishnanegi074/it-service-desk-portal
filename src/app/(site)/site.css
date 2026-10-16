@@ -148,7 +148,7 @@
 .tp-site .tab[aria-selected="true"] .t span:last-child { color: var(--accent); }
 .tp-site .tab[aria-selected="true"] p { max-height: 120px; opacity: 1; margin-top: 10px; }
 .tp-site .tab:hover .t { color: var(--fg); }
-.tp-site .stage { position: sticky; top: 100px; }
+.tp-site .stage { position: relative; }
 .tp-site .panel { padding: 22px; }
 
 .tp-site .matrix-wrap { display: grid; gap: 18px; }
@@ -214,12 +214,12 @@
 .tp-site .stage-chip i { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
 
 /* Closing */
-.tp-site .closing { padding-block: 168px; text-align: center; position: relative; overflow: hidden; border-bottom: 1px solid var(--line); }
-.tp-site .closing::before { content: ""; position: absolute; left: 50%; top: 58%; width: 900px; height: 900px; max-width: 160vw; transform: translate(-50%, -50%); background: radial-gradient(circle, color-mix(in srgb, var(--accent) 16%, transparent), transparent 60%); pointer-events: none; }
+.tp-site .closing { padding-block: 160px; text-align: left; position: relative; overflow: hidden; border-bottom: 1px solid var(--line); }
+.tp-site .closing::before { content: ""; position: absolute; left: 22%; top: 55%; width: 900px; height: 900px; max-width: 160vw; transform: translate(-50%, -50%); background: radial-gradient(circle, color-mix(in srgb, var(--accent) 16%, transparent), transparent 60%); pointer-events: none; }
 .tp-site .closing .rail { position: relative; }
-.tp-site .closing h2 { font-size: clamp(44px, 7.5vw, 104px); line-height: 0.95; letter-spacing: -0.055em; }
-.tp-site .closing p { margin: 24px auto 0; max-width: 46ch; color: var(--muted); font-size: 18px; }
-.tp-site .closing .ctas { margin-top: 36px; display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; }
+.tp-site .closing h2 { font-size: clamp(40px, 7vw, 96px); line-height: 0.98; letter-spacing: -0.055em; max-width: 15ch; }
+.tp-site .closing p { margin: 24px 0 0; max-width: 46ch; color: var(--muted); font-size: 18px; }
+.tp-site .closing .ctas { margin-top: 36px; display: flex; justify-content: flex-start; flex-wrap: wrap; gap: 12px; }
 
 /* Footer */
 .tp-site footer { padding-block: 64px 48px; }
