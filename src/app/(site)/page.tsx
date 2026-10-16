@@ -20,10 +20,7 @@ export default function HomePage() {
         <span className="status"><i />Now preparing a pilot with one internal IT team</span>
         <h1 id="hero-title">
           Every IT ticket,{' '}
-          <em className="scribble">
-            resolver&#8209;ready.
-            <svg viewBox="0 0 300 14" preserveAspectRatio="none" aria-hidden="true"><path pathLength={1} d="M3 10 C 70 4, 150 2, 297 6 M 40 12 C 120 8, 200 8, 262 10" /></svg>
-          </em>
+          <em>resolver&#8209;ready.</em>
         </h1>
         <p className="sub">Employees say “the VPN is broken.” Triage Portal asks the next useful question, sets priority the same way every time, strips out passwords, and hands your engineers one complete ticket.</p>
         <div className="ctas">
@@ -95,8 +92,6 @@ export default function HomePage() {
       </div>
 
       <div className="annotated">
-      <span className="note note-chat" aria-hidden="true">only what an engineer would ask
-        <svg viewBox="0 0 46 40"><path d="M6 4 C 24 6, 38 14, 36 34 M 30 28 L 36 35 L 42 27"/></svg></span>
       <div className="window" role="img" aria-label="Example intake conversation ending in a P2 ticket">
         <div className="window-bar"><div className="dots"><i></i><i></i><i></i></div><span className="label">Report an issue · Network / VPN</span><span className="label">67%</span></div>
         <div className="chat">

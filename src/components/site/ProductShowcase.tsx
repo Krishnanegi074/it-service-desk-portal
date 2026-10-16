@@ -117,10 +117,6 @@ export function ProductShowcase() {
       </div>
 
       <div className="stage annotated">
-        <span className="note note-matrix" aria-hidden="true">
-          <svg viewBox="0 0 46 40" style={{ transform: 'scaleX(-1)' }}><path d="M6 4 C 24 6, 38 14, 36 34 M 30 28 L 36 35 L 42 27" /></svg>
-          try the buttons
-        </span>
 
         <div className="window" id="p-0" role="tabpanel" aria-labelledby="t-0" hidden={active !== 0}>
           <Bar left="Priority matrix" right={<span className="label">ITIL 4×4</span>} />
