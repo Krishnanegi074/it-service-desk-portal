@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getIncidentByExternalId, updateIncidentStatus } from '@/lib/db';
 import { mapJiraStatus, verifyJiraWebhookSecret } from '@/lib/jira-webhook';
+import { fetchJiraIssueStatus } from '@/lib/ticketing/jira-status-sync';
 
 const JiraWebhookSchema = z.object({
   issue: z.object({
@@ -31,7 +32,8 @@ export async function POST(request: Request) {
     }
 
     const externalId = parsed.data.issue.key;
-    const jiraStatus = parsed.data.issue.fields.status.name;
+    // Prefer Jira's live status over the payload: deliveries can arrive out of order.
+    const jiraStatus = (await fetchJiraIssueStatus(externalId)) ?? parsed.data.issue.fields.status.name;
     const mappedStatus = mapJiraStatus(jiraStatus);
     if (!mappedStatus) {
       return NextResponse.json({ success: true, ignored: true, reason: 'Unmapped Jira status.' });

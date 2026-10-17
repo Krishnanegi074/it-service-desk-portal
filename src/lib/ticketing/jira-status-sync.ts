@@ -138,3 +138,25 @@ export async function syncJiraIssueStatus(
     return { status: 'failed', issueKey, error: error instanceof Error ? error.message : 'Jira request failed.' };
   }
 }
+
+/** Reads the issue's current status from Jira, so out-of-order webhook deliveries cannot roll a ticket back. */
+export async function fetchJiraIssueStatus(issueKey: string): Promise<string | null> {
+  try {
+    const config = getJiraConfig();
+    if (!config) return null;
+    const response = await fetch(
+      `${config.baseUrl}/rest/api/3/issue/${encodeURIComponent(issueKey)}?fields=status`,
+      {
+        headers: {
+          Accept: 'application/json',
+          Authorization: `Basic ${Buffer.from(`${config.email}:${config.apiToken}`).toString('base64')}`
+        }
+      }
+    );
+    if (!response.ok) return null;
+    const body = (await response.json().catch(() => ({}))) as { fields?: { status?: { name?: string } } };
+    return body.fields?.status?.name ?? null;
+  } catch {
+    return null;
+  }
+}
