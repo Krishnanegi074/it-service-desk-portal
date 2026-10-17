@@ -68,6 +68,20 @@ describe('Jira status sync', () => {
     expect(JSON.parse(fetchMock.mock.calls[4][1].body)).toEqual({ transition: { id: '7' } });
   });
 
+  it('treats a Completed step as resolved', async () => {
+    configureJira();
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(json({ fields: { status: { name: 'Work in progress' } } }))
+      .mockResolvedValueOnce(json({ transitions: [
+        { id: '1', name: 'Pending', to: { name: 'Pending' } },
+        { id: '2', name: 'Cancel', to: { name: 'Canceled' } },
+        { id: '3', name: 'Complete', to: { name: 'Completed' } }
+      ] }))
+      .mockResolvedValueOnce(new Response(null, { status: 204 }));
+    vi.stubGlobal('fetch', fetchMock);
+    expect(await syncJiraIssueStatus('IT-3', 'resolved')).toEqual({ status: 'synced', issueKey: 'IT-3', jiraStatus: 'Completed' });
+  });
+
   it('does nothing when Jira already shows the same status', async () => {
     configureJira();
     const fetchMock = vi.fn().mockResolvedValueOnce(json({ fields: { status: { name: 'Resolved' } } }));

@@ -19,7 +19,7 @@ const PREFERRED_TARGETS: Record<IncidentStatus, string[]> = {
   open: ['open', 'to do', 'new', 'backlog'],
   in_triage: ['in progress', 'work in progress', 'in triage', 'investigating', 'waiting for support'],
   dispatched: ['escalated', 'assigned', 'dispatched', 'in progress', 'work in progress'],
-  resolved: ['resolved', 'done', 'closed']
+  resolved: ['resolved', 'completed', 'done', 'closed']
 };
 
 function isCancel(name: string) {

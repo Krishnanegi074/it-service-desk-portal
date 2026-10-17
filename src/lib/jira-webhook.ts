@@ -19,6 +19,6 @@ export function mapJiraStatus(statusName: string): IncidentStatus | null {
   if (['assigned', 'dispatched', 'escalated', 'pending', 'waiting for customer'].includes(normalized)) {
     return 'dispatched';
   }
-  if (['resolved', 'closed', 'done', 'cancelled', 'canceled'].includes(normalized)) return 'resolved';
+  if (['resolved', 'completed', 'complete', 'closed', 'done', 'cancelled', 'canceled'].includes(normalized)) return 'resolved';
   return null;
 }
